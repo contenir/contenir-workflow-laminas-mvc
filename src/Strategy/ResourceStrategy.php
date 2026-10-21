@@ -193,6 +193,7 @@ class ResourceStrategy implements ResourceStrategyInterface
             'label'      => $resource->title_short ?? $resource->title,
             'route'      => $workflow->getRouteId(),
             'lastmod'    => $lastmod instanceof DateTimeInterface ? $lastmod->format('Y-m-d H:i:s') : null,
+            'workflow'   => $resource->workflow ?? 'page',
             'changefreq' => $workflow->getPageChangeFrequency(),
             'priority'   => $workflow->getPriority(),
             'visible'    => (bool) $resource->visible,
@@ -265,11 +266,12 @@ class ResourceStrategy implements ResourceStrategyInterface
             $params           = $routePage['params'] ?? [];
             $landingPageTitle = $routePage['landingTitle'] ?? false;
             $subPage          = [
-                'label'   => $routePage['title'] ?? $resource->title_short ?? $resource->title,
-                'visible' => $resource->visible,
-                'route'   => $subRouteId,
-                'params'  => $params,
-                'pages'   => [],
+                'label'    => $routePage['title'] ?? $resource->title_short ?? $resource->title,
+                'visible'  => $resource->visible,
+                'route'    => $subRouteId,
+                'workflow' => $resource->workflow ?? 'page',
+                'params'   => $params,
+                'pages'    => [],
             ];
 
             if ($landingPageTitle) {
