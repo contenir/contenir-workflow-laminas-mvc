@@ -145,6 +145,7 @@ abstract class AbstractResourceStrategy implements ResourceStrategyInterface
             ?? ResourceProperty::string($resource, 'title'),
             'route'      => $routeId,
             'lastmod'    => $lastmod?->format('Y-m-d H:i:s'),
+            'workflow'   => ResourceProperty::string($resource, 'workflow') ?? 'page',
             'changefreq' => $workflow->getPageChangeFrequency(),
             'priority'   => $workflow->getPriority(),
             'visible'    => ResourceProperty::bool($resource, 'visible'),
@@ -343,13 +344,14 @@ abstract class AbstractResourceStrategy implements ResourceStrategyInterface
 
             $landingPageTitle = $routePage['landingTitle'] ?? false;
             $subPage          = [
-                'label'   => $routePage['title']
+                'label'    => $routePage['title']
                 ?? ResourceProperty::string($resource, 'title_short')
                 ?? ResourceProperty::string($resource, 'title'),
-                'visible' => ResourceProperty::bool($resource, 'visible'),
-                'route'   => $subRouteId,
-                'params'  => $routePage['params'] ?? [],
-                'pages'   => [],
+                'visible'  => ResourceProperty::bool($resource, 'visible'),
+                'route'    => $subRouteId,
+                'workflow' => ResourceProperty::string($resource, 'workflow') ?? 'page',
+                'params'   => $routePage['params'] ?? [],
+                'pages'    => [],
             ];
 
             if ($landingPageTitle) {

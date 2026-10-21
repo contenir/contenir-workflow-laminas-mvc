@@ -116,6 +116,17 @@ final class ResourceStrategyTest extends TestCase
     }
 
     /**
+     * @return array<string, array{array<string, mixed>, string}>
+     */
+    public static function workflowNameProvider(): array
+    {
+        return [
+            'named workflow'   => [['title' => 'News', 'workflow' => 'news'], 'news'],
+            'default workflow' => [['title' => 'About'], 'page'],
+        ];
+    }
+
+    /**
      * @param array<array-key, mixed> $resources
      */
     private static function repository(array $resources): ResourceAdapterInterface
@@ -482,6 +493,7 @@ final class ResourceStrategyTest extends TestCase
                 'label'      => 'Short',
                 'route'      => '1-1',
                 'lastmod'    => null,
+                'workflow'   => 'page',
                 'changefreq' => 'daily',
                 'priority'   => '1.0',
                 'visible'    => true,
@@ -511,6 +523,34 @@ final class ResourceStrategyTest extends TestCase
         $this->expectExceptionMessage('Workflow ' . ConfiguredWorkflow::class . ' has no resource set');
 
         $strategy->getNavigationPage(new ConfiguredWorkflow());
+    }
+
+    /**
+     * @param array<string, mixed> $columns
+     */
+    #[Test]
+    #[DataProvider('workflowNameProvider')]
+    public function pagesNameTheResourceWorkflow(array $columns, string $workflowName): void
+    {
+        $workflow = new ConfiguredWorkflow(
+            routeId: 'parent',
+            pages: ['a' => [['title' => 'A', 'pages' => ['b' => [['title' => 'B']]]]], 'c' => [['title' => 'C']]],
+        );
+        $workflow->setLandingPage(flag: true);
+
+        $page    = $this->navigationPage($workflow, new MagicResource($columns));
+        $landing = $page['pages'][0];
+
+        static::assertSame(
+            [$workflowName, $workflowName, $workflowName, $workflowName, $workflowName],
+            [
+                $page['workflow'],
+                $landing['workflow'],
+                $landing['pages'][0]['workflow'],
+                $landing['pages'][0]['pages'][0]['workflow'],
+                $landing['pages'][1]['workflow'],
+            ],
+        );
     }
 
     /**
@@ -633,11 +673,12 @@ final class ResourceStrategyTest extends TestCase
             [
                 false,
                 [[
-                    'label'   => 'Sub Page',
-                    'visible' => true,
-                    'route'   => 'parent/sub',
-                    'params'  => ['p' => 1],
-                    'pages'   => [],
+                    'label'    => 'Sub Page',
+                    'visible'  => true,
+                    'route'    => 'parent/sub',
+                    'workflow' => 'page',
+                    'params'   => ['p' => 1],
+                    'pages'    => [],
                 ]],
             ],
             [$page['useRouteMatch'] ?? null, $page['pages']],

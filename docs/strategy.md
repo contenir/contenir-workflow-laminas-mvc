@@ -26,6 +26,7 @@ $strategy->getNavigationConfig(); // [['label' => 'About', 'route' => '1-12', 'p
     'label'      => 'About',                  // title_short, else title
     'route'      => '1-12',
     'lastmod'    => '2024-01-02 03:04:05',    // MetadataInterface::getMetaModified(), else null
+    'workflow'   => 'page',                   // the resource's workflow, else page
     'changefreq' => 'weekly',
     'priority'   => '0.5',
     'visible'    => true,
@@ -35,8 +36,9 @@ $strategy->getNavigationConfig(); // [['label' => 'About', 'route' => '1-12', 'p
 ```
 
 Child route pages (the workflow's `$pages`) are added under the page, with
-`useRouteMatch` set to `false`. A **landing page** (a copy of the page, labelled with
-the workflow's `$routeTitle`) is inserted between them when:
+`useRouteMatch` set to `false`. They carry the page's `workflow`, so a sitemap that
+leaves out a workflow leaves out its sub-pages too. A **landing page** (a copy of the
+page, labelled with the workflow's `$routeTitle`) is inserted between them when:
 
 - the workflow has more than one child route and `$landingPage` is set, or
 - the workflow has at most one child route, the resource has children, and the

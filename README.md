@@ -62,7 +62,7 @@ columns, read through `__get()`:
 
 | Property | Used for | Default |
 | --- | --- | --- |
-| `workflow` | Workflow plugin name | `page` |
+| `workflow` | Workflow plugin name, also set as each navigation page's `workflow` | `page` |
 | `resource_type_id`, `resource_id` | Route name `"<type>-<id>"` | |
 | `title`, `title_short` | Navigation labels (short title first) | |
 | `visible` | Whether the resource appears in the navigation (it is routed either way) | hidden |
