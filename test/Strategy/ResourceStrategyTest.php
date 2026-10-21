@@ -525,6 +525,59 @@ class ResourceStrategyTest extends TestCase
         $this->assertSame('parent/a/b', $sub['pages'][1]['route']);
     }
 
+    /**
+     * @return array<string, array{array<string, mixed>, bool, string}>
+     */
+    public function workflowNameProvider(): array
+    {
+        return [
+            'named workflow'   => [['workflow' => 'news'], false, 'news'],
+            'default workflow' => [[], true, 'page'],
+        ];
+    }
+
+    /**
+     * @dataProvider workflowNameProvider
+     */
+    public function testGetNavigationPageNamesTheResourceWorkflowOnEveryPage(
+        array $properties,
+        bool $withoutWorkflow,
+        string $expected
+    ): void {
+        $resource = new ResourceStub($properties);
+        if ($withoutWorkflow) {
+            unset($resource->workflow);
+        }
+        $resource->setPrimaryKeys(['resource_id' => 1]);
+
+        $workflow = $this->createMock(AbstractWorkflow::class);
+        $workflow->method('getResource')->willReturn($resource);
+        $workflow->method('getRouteId')->willReturn('parent');
+        $workflow->method('getRouteTitle')->willReturn('Landing');
+        $workflow->method('getRoutePages')->willReturn([
+            'a' => [['title' => 'A', 'pages' => ['b' => [['title' => 'B']]]]],
+            'c' => [['title' => 'C']],
+        ]);
+        $workflow->method('getResourceId')->willReturn('rid');
+        $workflow->method('getPageChangeFrequency')->willReturn(null);
+        $workflow->method('getPriority')->willReturn('0.5');
+        $workflow->method('getLandingPage')->willReturn(true);
+
+        $page    = $this->makeStrategy()->getNavigationPage($workflow);
+        $landing = $page['pages'][0];
+
+        $this->assertSame(
+            [$expected, $expected, $expected, $expected, $expected],
+            [
+                $page['workflow'],
+                $landing['workflow'],
+                $landing['pages'][0]['workflow'],
+                $landing['pages'][0]['pages'][0]['workflow'],
+                $landing['pages'][1]['workflow'],
+            ]
+        );
+    }
+
     public function testGetNavigationPageFallsBackToTitleWhenNoRoutePageTitleProvided(): void
     {
         $resource = new ResourceStub([
